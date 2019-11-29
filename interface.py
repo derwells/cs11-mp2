@@ -14,9 +14,11 @@ class Interface():
 		self.game_user_input = None
 		self.game_time_start = None
 		self.end_is_running = False
+		self.init_menu = False
 		self.diff_is_running = False
 		self.diff_value = None
-
+		self.curr_button = 0
+		#self.KEY_GROUPING = [[key.A, key.B, key.C, key.D, key.E, key.F, k
 		pyglet.resource.path = ['resources/']
 		pyglet.font.add_file('SourceCodePro-Black.ttf')
 		pyglet.font.add_file('SourceCodePro-Bold.ttf')
@@ -46,8 +48,12 @@ class Interface():
 		self.game_is_running = False
 		self.diff_is_running = False
 		self.lb_is_running = False
+		self.init_menu = False
 		self.end_is_running = False
 
+		self.game_user_input = ""
+		self.curr_button = None
+		self.active_buttons = []
 		self.active_buttons.append(self.difficulty)
 		return
 
@@ -56,10 +62,13 @@ class Interface():
 		self.end_is_running = False
 		self.menu_is_running = False
 		self.game_is_running = False
+		self.init_menu = False
 		self.lb_is_running = False
 
-		self.active_buttons.append([[175, 225],[675, 725],['normal']])
-		self.active_buttons.append([[375, 325],[675, 725],['hard']])
+		self.curr_button = None
+		self.active_buttons = []
+		self.active_buttons.append('normal')
+		self.active_buttons.append('hard')
 		return
 
 	def boggle(self):
@@ -67,12 +76,16 @@ class Interface():
 		self.menu_is_running = False
 		self.lb_is_running = False
 		self.end_is_running = False
-		self.menu_is_running = False
 		self.diff_is_running = False
+		self.init_menu = False
+		self.menu_is_running = False
 
+		self.answer_idx = 0
+		self.curr_button = None
 		self.game_points = 0
+		self.active_buttons = []
 		self.game_user_input = ""
-		self.engine.make_board(5)
+		self.engine.make_board(4)
 		self.engine.solve_boggle()
 		self.start = time.time()
 		print(self.engine.game_solutions)
@@ -83,16 +96,20 @@ class Interface():
 		self.diff_is_running = False
 		self.menu_is_running = False
 		self.game_is_running = False
-		self.diff_is_running = False
-		self.diff_size_is_running = False
 		self.lb_is_running = False
-		self.active_buttons.append([[175, 225],[675, 725],[]])
+		self.init_menu = False
+		self.diff_size_is_running = False
+
+		self.game_user_input = ""
+		self.curr_button = None
+		self.active_buttons = []
 		return
 
 	def timer(self, current_time):
 		current_time = time.time() - self.start
 		minutes = int(current_time//60)
 		seconds = int(current_time%60)
+
 		return(minutes, seconds)
 
 	def start_screen(self):
@@ -133,13 +150,23 @@ class Interface():
 			for i in range(len(word)):
 					if word[i] == '$':
 						word = word[:i] + 'qu' + word[i + 1:]
+
 			pyglet.text.Label(word,
 						font_name='Source Code Pro', bold = True,
 						font_size=12,
 						x=self.window.width//2 - 100, y=self.window.height//2 - 100,
 						anchor_x='center', anchor_y='center').draw()
-			for i in range(5):
-					for j in range(5):
+			
+			if self.engine.game_answered != []:
+				for i in range(min(len(self.engine.game_answered), 10)):
+					len_answered = len(self.engine.game_answered) - 1
+					pyglet.text.Label(self.engine.game_answered[len_answered - i],
+									font_name='Source Code Pro', bold = True,
+									font_size=12,
+									x=100, y=12*(i+1),
+									anchor_x='center', anchor_y='center').draw()
+			for i in range(4):
+					for j in range(4):
 						letter = self.engine.game_board[i][j]
 						if self.engine.game_board[i][j] == '$':
 							letter = 'qu'
@@ -148,7 +175,7 @@ class Interface():
 								font_size=12,
 								x=100+50*i, y=400+50*j,
 								anchor_x='center', anchor_y='center').draw()
-			if minutes >= 0 and seconds >= 10:
+			if minutes >= 0 and seconds >= 59: #time
 				self.game_end()
 		return
 
@@ -167,12 +194,25 @@ class Interface():
 									font_size=12,
 									x=100, y=700,
 									anchor_x='center', anchor_y='center').draw()
+
 			pyglet.text.Label("back to menu",
 								font_name='Source Code Pro', bold = True,
 								font_size=12,
 								x=200, y=700,
 								anchor_x='center', anchor_y='center').draw()
+			word = self.game_user_input
+			if word:
+				print(word)
+			for i in range(len(word)):
+					if word[i] == '$':
+						word = word[:i] + 'qu' + word[i + 1:]
+			pyglet.text.Label(word,
+						font_name='Source Code Pro', bold = True,
+						font_size=12,
+						x=self.window.width//2 - 100, y=self.window.height//2 - 100,
+						anchor_x='center', anchor_y='center').draw()
 		return
+
 
 	def update(self, dt):
 		@self.window.event
@@ -185,58 +225,53 @@ class Interface():
 			return
 
 		@self.window.event
-		def on_mouse_press(x, y, button, modifiers):
-			if self.menu_is_running == True:
-				for button in self.active_buttons:
-					if (
-						button[0][0] <= x <= button[0][1]
-					) and (
-						button[1][0] <= y <= button[1][1]
-					): 
-						print("pressed menu")
-						self.active_buttons = []
-						self.difficulty()
+		def on_key_press(symbol, modifiers):
+			if self.menu_is_running == True or self.end_is_running == True:
+				if self.curr_button != None:
+					if symbol == key.UP:
+						if self.curr_button > 0:
+							self.curr_button -= 1
+					elif symbol == key.DOWN:
+						if self.curr_button < len(self.active_buttons) - 1:
+							self.curr_button += 1
+					elif symbol == key.ENTER:
+						if self.curr_button <= len(self.active_buttons) - 1 and self.curr_button >= 0:
+							self.active_buttons[self.curr_button]()
+				else:
+					self.curr_button = 0
 
 			if self.diff_is_running == True:
-				for button in self.active_buttons:
-					if (
-						button[0][0] <= x <= button[0][1]
-					) and (
-						button[1][0] <= y <= button[1][1]
-					): 
-						if button[2] == "normal":
-							self.diff_value = 0.4
+				if self.curr_button != None:
+					if symbol == key.UP:
+						if self.curr_button > 0:
+							self.curr_button -= 1
+					elif symbol == key.DOWN:
+						if self.curr_button < len(self.active_buttons) - 1:
+							self.curr_button += 1
+					elif symbol == key.ENTER:
+						value = self.active_buttons[self.curr_button]
+						if value == "normal":
+							self.diff_value = 0.3
 						else:
-							self.diff_value = 0.8
-						print("pressed diff")
-						self.active_buttons = []
+							self.diff_value = 0.7
 						self.boggle()
-			
-			if self.end_is_running == True:
-				for button in self.active_buttons:
-					if (
-						button[0][0] <= x <= button[0][1]
-					) and (
-						button[1][0] <= y <= button[1][1]
-					): 
-						self.active_buttons = []
-						self.start_menu()
-			return
+				else:
+					self.curr_button = 0
 
-		@self.window.event
-		def on_key_press(symbol, modifiers):
-			if self.menu_is_running == True:
-				curr_button = 0
+			if self.game_is_running == True or self.end_is_running == True:
 				if symbol == key.UP:
-					if curr_button != 0:
-						curr_button -= 1
-				elif symbol == key.DOWN:
-					if curr_button != len(self.active_buttons) - 1:
-						curr_button += 1
-				elif symbol == key.ENTER:
-					self.active_buttons = []
-					if 
-			if self.menu_is_running == False and self.game_is_running == True:
+					if self.answer_idx > 0:
+						self.answer_idx -= 1
+						self.game_user_input = self.engine.game_answered[self.answer_idx]	
+				if symbol == key.DOWN:
+					len_answered = len(self.engine.game_answered)
+					if self.answer_idx <= len_answered - 1:
+						self.answer_idx += 1
+						if self.answer_idx == len_answered:
+							self.game_user_input = ""
+						else:
+							self.game_user_input = self.engine.game_answered[self.answer_idx]
+				
 				if symbol == key.A:
 					self.game_user_input += "a"
 				elif symbol == key.B:
@@ -278,17 +313,21 @@ class Interface():
 				elif symbol == key.T:
 					self.game_user_input += "t"
 				elif symbol == key.U:
-					word = self.game_user_input
-					if word != "":
-						if word[len(word) - 1] == 'q':
-							self.game_user_input = self.game_user_input[:len(word) - 1]
-							self.game_user_input += '$'
+					if self.game_is_running == True:
+						word = self.game_user_input
+						if word != "":
+							if word[len(word) - 1] == 'q':
+								self.game_user_input = self.game_user_input[:len(word) - 1]
+								self.game_user_input += '$'
+							else:
+								self.game_user_input += 'u'
 						else:
-							self.game_user_input += 'u'
+							self.game_user_input += "u"
 					else:
 						self.game_user_input += "u"
 				elif symbol == key.V:
 					self.game_user_input += "v"
+					print(symbol)
 				elif symbol == key.W:
 					self.game_user_input += "w"
 				elif symbol == key.X:
@@ -297,14 +336,24 @@ class Interface():
 					self.game_user_input += "y"
 				elif symbol == key.Z:
 					self.game_user_input += "z"
+
 				if symbol == key.BACKSPACE:
 					self.game_user_input = self.game_user_input[:len(self.game_user_input) - 1]
 				if symbol == key.ENTER:
 					answer = self.game_user_input
 					self.game_user_input = ""
-					if self.engine.verify(answer):
-						self.engine.curr_score += self.engine.points(answer)
-						self.engine.game_answered.append(answer)
-						print("correct!")
+					if self.game_is_running == True:
+						if self.engine.verify(answer):
+							self.engine.curr_score += self.engine.points(answer)
+							self.engine.game_answered.append(answer)
+							self.answer_idx = len(self.engine.game_answered)
+							print("correct!")
+					if self.end_is_running == True:
+						leaderboard = open("leaderboard.txt", "a")
+						leaderboard.write("{0},{1},{2}\n".format(answer, self.engine.curr_score, self.engine.max_score))
+						leaderboard.close()
+						self.active_buttons.append(self.start_menu)
+				self.answer_idx = len(self.engine.game_answered) #when a key is pressed, reset idx
 
+			return
 					
