@@ -97,8 +97,8 @@ class Interface():
 				font_size=12,
 				x=50, y=300,
 				anchor_x='center', anchor_y='center',
-				color = (255,255,255,255)
-				).draw()
+				color = (57, 255, 20, 255)
+			).draw()
 
 	def difficulty_screen(self):
 		if self.diff_is_running == True:
@@ -108,8 +108,8 @@ class Interface():
 				font_size=12,
 				x=100, y=300,
 				anchor_x='center', anchor_y='center',
-				color = (255,255,255,255)
-				).draw()
+				color = (57, 255, 20, 255)
+			).draw()
 
 			pyglet.text.Label(
 				"hard",
@@ -117,8 +117,8 @@ class Interface():
 				font_size=12,
 				x=100, y=200,
 				anchor_x='center', anchor_y='center',
-				color = (255,255,255,255)
-				).draw()
+				color = (57, 255, 20, 255)
+			).draw()
 
 	def timer(self, current_time):
 		minutes = int((self.max_time - current_time) // 60)
@@ -132,7 +132,7 @@ class Interface():
 			x=408, y=580,
 			anchor_x='center',
 			color = (0,0,0,255)
-			).draw()
+		).draw()
 	
 	def view_as_qu(self, word):
 		if '$' in word:
@@ -142,28 +142,25 @@ class Interface():
 		return word
 
 	def input_box(self):
-		current_input = self.view_as_qu(self.game_user_input)
 		pyglet.text.Label(
-			"> " + current_input,
+			"> " + self.game_user_input,
 			font_name='Source Code Pro', bold = True,
-			font_size=11,
+			font_size=10,
 			x=415, y=35,
-			color = (255,255,255,255)
-			).draw()
+			color = (57, 255, 20, 255)
+		).draw()
 
 		if self.engine.game_answered != []:
 				for i in range(min(len(self.engine.game_answered), 25)):
 					len_answered = len(self.engine.game_answered) - 1
-					past_answer = self.engine.game_answered[len_answered - i]
-					self.view_as_qu(past_answer)
 
 					pyglet.text.Label(
-						"root@terminal:~$ " + past_answer,
+						"root@terminal:~$ " + self.view_as_qu(self.engine.game_answered[len_answered - i]),
 						font_name='Source Code Pro', bold = True,
-						font_size=11,
+						font_size=10,
 						x=415, y=35 + 20*(i+1),
-						color = (255,255,255,255)
-						).draw()
+						color = (57, 255, 20, 255)
+					).draw()
 
 		return
 	
@@ -174,43 +171,35 @@ class Interface():
 				pyglet.text.Label(
 					indicator[i],
 					font_name='Hack', bold = True,
-					font_size=8,
-					x=30, y=120 - 10*i,
+					font_size=12,
+					x=45, y=120 - 14*i,
 					color = (255,255,255,255)
-					).draw()
+				).draw()
 		else:
 			indicator = self.ascii.error
 			for i in range(len(indicator)):
 				pyglet.text.Label(
 					indicator[i],
 					font_name='Hack', bold = True,
-					font_size=8,
-					x=80, y=120 - 10*i,
-					color = (255,255,255,255)
-					).draw()
+					font_size=12,
+					x=80, y=120 - 14*i,
+					color = (216,0,12,255)
+				).draw()
 
 
 	def stats(self):
 		info = [
-				"unhacked  words: " + str(len(self.engine.game_solutions) - len(self.engine.game_answered)) + 
-				" hacked  words: " + str(len(self.engine.game_answered)),
-				"unhacked points: " + str(self.engine.max_score - self.engine.curr_score) +
-				" hacked points: " + str(self.engine.curr_score),
-				"---------------------------------------",
-				"3-4 letters: 1pt",
-				"  5 letters: 2pts",
-				"  6 letters: 3pts",
-				"  7 letters: 5pts",
-				" 8+ letters: 11pts"
-				]
+			"hacking..............................{0}%".format(int(100*self.engine.curr_score/self.engine.max_score)),
+			"words................................{0}".format(len(self.engine.game_solutions) - len(self.engine.game_answered))
+		]
 
-		for i in range(8):
+		for i in range(2):
 			pyglet.text.Label(
 				info[i],
 				font_name='Source Code Pro', bold = True,
 				font_size=11,
-				x=35, y=150-(20*i),
-				color = (255,255,255,255)
+				x=35, y=150-(15*i),
+				color = (57, 255, 20, 255)
 				).draw()
 
 #1eb1d1, 007890, 00bee7
@@ -237,8 +226,7 @@ class Interface():
 			for i in range(self.select_board_size):
 					for j in range(self.select_board_size):
 						letter = self.engine.game_board[i][j]
-						letter = self.view_as_qu(letter)
-						letter = "Qu" if "qu" in letter else letter.capitalize()
+						letter = "Qu" if "$" == letter else letter.capitalize()
 						if self.select_board_size == 4:
 							idx = 68+95*j+1
 							idy = 512-95*i
@@ -253,8 +241,8 @@ class Interface():
 							font_size=fs,
 							x=idx, y=idy,
 							anchor_x='center', anchor_y='center',
-							color = (255,255,255,255)
-							).draw()
+							color = (57, 255, 20, 255)
+						).draw()
 
 			if current_time >= self.max_time or self.engine.curr_score == self.engine.max_score: #time
 				self.game_end()
@@ -268,8 +256,8 @@ class Interface():
 					font_size=12,
 					x=100, y=100,
 					anchor_x='center', anchor_y='center',
-					color = (255,255,255,255)
-					).draw()
+					color = (57, 255, 20, 255)
+				).draw()
 			else:
 				pyglet.text.Label(
 					'w0rdh@ck f@il3d...',
@@ -277,8 +265,8 @@ class Interface():
 					font_size=12,
 					x=100, y=100,
 					anchor_x='center', anchor_y='center',
-					color = (255,255,255,255)
-					).draw()
+					color = (57, 255, 20, 255)
+				).draw()
 
 			pyglet.text.Label(
 				"back to menu",
@@ -286,8 +274,8 @@ class Interface():
 				font_size=12,
 				x=100, y=200,
 				anchor_x='center', anchor_y='center',
-				color = (255,255,255,255)
-				).draw()
+				color = (57, 255, 20, 255)
+			).draw()
 
 			username = self.game_user_input
 			pyglet.text.Label(
@@ -296,8 +284,8 @@ class Interface():
 				font_size=12,
 				x=self.window.width//2 - 100, y=self.window.height//2 - 100,
 				anchor_x='center', anchor_y='center',
-				color = (255,255,255,255)
-				).draw()
+				color = (57, 255, 20, 255)
+			).draw()
 
 
 	def update(self, dt):
@@ -381,21 +369,18 @@ class Interface():
 							self.game_user_input = self.engine.game_answered[self.answer_idx]
 				if (97 <= symbol <= 122) and len(self.game_user_input) <= 26:
 					self.answer_idx = len(self.engine.game_answered) #when a key is pressed, reset idx
-					if symbol == 117:
-						if self.game_is_running == True:
-							word = self.game_user_input
-							if word != "":
-								if word[len(word) - 1] == 'q':
-									self.game_user_input = self.game_user_input[:len(word) - 1]
-									self.game_user_input += '$'
-								else:
-									self.game_user_input += 'u'
+					self.game_user_input += chr(symbol)
+					"""if self.game_is_running == True:
+						if self.game_user_input != "":
+							print(self.game_user_input) #bugged
+							if self.game_user_input[len(self.game_user_input) - 1] == 'q':
+								self.game_user_input = self.game_user_input[:len(self.game_user_input) - 1] + '$'
 							else:
-								self.game_user_input += "u"
+								self.game_user_input += 'u'
 						else:
 							self.game_user_input += "u"
 					else:
-						self.game_user_input += chr(symbol)
+						self.game_user_input += "u"""
 				if symbol == key.BACKSPACE:
 					self.game_user_input = self.game_user_input[:len(self.game_user_input) - 1]
 					self.answer_idx = len(self.engine.game_answered) #when a key is pressed, reset idx
@@ -403,6 +388,10 @@ class Interface():
 					self.answer_idx = len(self.engine.game_answered) #when a key is pressed, reset idx
 					answer = self.game_user_input
 					self.game_user_input = ""
+					while "qu" in answer:
+						qu_idx = answer.find("qu")
+						answer = answer[:qu_idx] + "$" + answer[qu_idx + 2:] 
+					print(answer)
 					if answer and self.engine.verify(answer):
 						self.engine.curr_score += self.engine.points(answer)
 						self.engine.game_answered.append(answer)
@@ -410,5 +399,4 @@ class Interface():
 						self.answer_correct = "t"
 					elif answer:
 						self.answer_correct = "f"
-					print(self.engine.curr_score, self.engine.max_score)
 					
