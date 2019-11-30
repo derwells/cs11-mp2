@@ -6,7 +6,6 @@ from pyglet.window import key
 class Interface():
 	def __init__(self):
 		self.window = pyglet.window.Window(width = 800, height = 600)
-		self.engine = e.Engine()
 		self.active_buttons = []
 		self.menu_is_running = True
 		self.game_is_running = False
@@ -17,7 +16,7 @@ class Interface():
 		self.ascii = a.Ascii()
 		pyglet.resource.path = ['resources/']
 		pyglet.font.add_directory('resources/')
-		self.scp_regular = pyglet.font.load('Hack', bold = False, italic = False)
+		self.scp_regular = pyglet.font.load('Source Code Pro', bold = False, italic = False)
 		self.scp_bold = pyglet.font.load('Source Code Pro Bold', bold = True, italic = False)
 		self.game_layout = pyglet.image.load('resources/game_gui.png')
 		pyglet.resource.reindex()
@@ -30,6 +29,7 @@ class Interface():
 		self.init_menu = False
 		self.end_is_running = False
 
+		self.engine = e.Engine()
 		self.game_user_input = ""
 		self.curr_button = None
 		self.active_buttons = []
@@ -89,7 +89,7 @@ class Interface():
 		if self.menu_is_running == True:
 			pyglet.text.Label(
 				">wordhack",
-				font_name='Hack', bold = True,
+				font_name='Source Code Pro', bold = True,
 				font_size=12,
 				x=50, y=300,
 				anchor_x='center', anchor_y='center',
@@ -100,7 +100,7 @@ class Interface():
 		if self.diff_is_running == True:
 			pyglet.text.Label(
 				"normal",
-				font_name='Hack', bold = True,
+				font_name='Source Code Pro', bold = True,
 				font_size=12,
 				x=100, y=300,
 				anchor_x='center', anchor_y='center',
@@ -109,7 +109,7 @@ class Interface():
 
 			pyglet.text.Label(
 				"hard",
-				font_name='Hack', bold = True,
+				font_name='Source Code Pro', bold = True,
 				font_size=12,
 				x=100, y=200,
 				anchor_x='center', anchor_y='center',
@@ -123,7 +123,7 @@ class Interface():
 
 		pyglet.text.Label(
 			"{0}:{1}".format(minutes, seconds),
-			font_name='Hack', bold = True,
+			font_name='Source Code Pro', bold = True,
 			font_size=12,
 			x=408, y=580,
 			anchor_x='center',
@@ -141,8 +141,8 @@ class Interface():
 		current_input = self.view_as_qu(self.game_user_input)
 		pyglet.text.Label(
 			"root@terminal:~$ " + current_input,
-			font_name='Hack', bold = True,
-			font_size=10,
+			font_name='Source Code Pro', bold = True,
+			font_size=11,
 			x=415, y=35,
 			color = (57,255,0,255)
 			).draw()
@@ -155,8 +155,8 @@ class Interface():
 
 					pyglet.text.Label(
 						"root@terminal:~$ " + past_answer,
-						font_name='Hack', bold = True,
-						font_size=10,
+						font_name='Source Code Pro', bold = True,
+						font_size=11,
 						x=415, y=35 + 20*(i+1),
 						color = (57,255,0,255)
 						).draw()
@@ -186,12 +186,32 @@ class Interface():
 					).draw()
 
 
-	def stats(self, dt):
+	def stats(self):
+		info = [
+			"unhacked  words: " + str(len(self.engine.game_solutions) - len(self.engine.game_answered)) + 
+			"  hacked  words: " + str(len(self.engine.game_solutions)),
+			"unhacked points: " + str(self.engine.max_score - self.engine.curr_score) +
+			"  hacked points: " + str(self.engine.curr_score),
+			"---------------------------------------",
+			"3-4 letters: 1pt",
+			"  5 letters: 2pts",
+			"  6 letters: 3pts",
+			"  7 letters: 5pts",
+			" >7 letters: 11pts"
+		]
+
+		for i in range(8):
+			pyglet.text.Label(
+				info[i],
+				font_name='Source Code Pro', bold = True,
+				font_size=11,
+				x=35, y=120-(12*i),
+				color = (57,255,0,255)
+				).draw()
+
+
+	def set_to_n(self, dt):
 		self.answer_correct = "n"
-		pyglet.text.Label(str(self.engine.curr_score),
-					font_name='Hack', bold = True,
-					font_size=8,
-					x=35, y=120).draw()
 
 	def game_screen(self):
 		if self.game_is_running == True:
@@ -201,25 +221,12 @@ class Interface():
 			self.timer(current_time)
 
 			self.input_box()
-			if self.engine.game_answered != []:
-				for i in range(min(len(self.engine.game_answered), 25)):
-					len_answered = len(self.engine.game_answered) - 1
-					past_answer = self.engine.game_answered[len_answered - i]
-					self.view_as_qu(past_answer)
-
-					pyglet.text.Label(
-						"root@terminal:~$ " + past_answer,
-						font_name='Hack', bold = True,
-						font_size=10,
-						x=415, y=35 + 20*(i+1),
-						color = (57,255,0,255)
-						).draw()
 
 			if self.answer_correct != "n":
-				pyglet.clock.schedule_once(self.stats, 1.0)
 				self.indicator()
+				pyglet.clock.schedule_once(self.set_to_n, 0.5)
 			else:
-				self.stats(0)
+				self.stats()
 
 			for i in range(self.select_board_size):
 					for j in range(self.select_board_size):
@@ -227,14 +234,14 @@ class Interface():
 						letter = self.view_as_qu(letter)
 						pyglet.text.Label(
 							letter,
-							font_name='Hack', bold = True,
+							font_name='Source Code Pro', bold = True,
 							font_size=12,
 							x=275-50*i, y=350-50*j,
 							anchor_x='center', anchor_y='center',
 							color = (57,255,0,255)
 							).draw()
 
-			if current_time >= self.max_time: #time
+			if current_time >= self.max_time or self.engine.curr_score == self.engine.max_score: #time
 				self.game_end()
 
 	def game_end_screen(self):
@@ -242,7 +249,7 @@ class Interface():
 			if self.engine.curr_score >= int(self.engine.max_score*0.4):
 				pyglet.text.Label(
 					'Successful wordhack.',
-					font_name='Hack', bold = True,
+					font_name='Source Code Pro', bold = True,
 					font_size=12,
 					x=100, y=100,
 					anchor_x='center', anchor_y='center',
@@ -251,7 +258,7 @@ class Interface():
 			else:
 				pyglet.text.Label(
 					'w0rdh@ck f@il3d...',
-					font_name='Hack', bold = True,
+					font_name='Source Code Pro', bold = True,
 					font_size=12,
 					x=100, y=100,
 					anchor_x='center', anchor_y='center',
@@ -260,7 +267,7 @@ class Interface():
 
 			pyglet.text.Label(
 				"back to menu",
-				font_name='Hack', bold = True,
+				font_name='Source Code Pro', bold = True,
 				font_size=12,
 				x=100, y=200,
 				anchor_x='center', anchor_y='center',
@@ -270,7 +277,7 @@ class Interface():
 			username = self.game_user_input
 			pyglet.text.Label(
 				username,
-				font_name='Hack', bold = True,
+				font_name='Source Code Pro', bold = True,
 				font_size=12,
 				x=self.window.width//2 - 100, y=self.window.height//2 - 100,
 				anchor_x='center', anchor_y='center',
@@ -388,4 +395,5 @@ class Interface():
 						self.answer_correct = "t"
 					elif answer:
 						self.answer_correct = "f"
+					print(self.engine.curr_score, self.engine.max_score)
 					

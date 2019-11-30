@@ -5,3 +5,5 @@ derickthehacklord,77,84
 derick,7,101
 nigqu,1,8
 derick,3,52
+derick,11,11
+derick,17,17
