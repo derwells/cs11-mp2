@@ -1,7 +1,8 @@
 # We import a file containing my version of the trie tree data 
 # structure, which will be particularly useful in searching for
 # valid words
-import my_trie, pyglet
+import pyglet
+from modules import my_trie
 from random import choice
 from math import sqrt
 
@@ -16,6 +17,23 @@ ADJ = [[1, 1],[-1, 1], [1, -1], [-1, -1], [0, 1], [1, 0], [0, -1], [-1, 0]]
 ALPH = "AAAAAABBCCDDDEEEEEEEEEEEFFGGHHHHHIIIIIIJKLLLLMMNNNNNNOOOOOOOPP$RRRRRSSSSSSTTTTTTTTTUUUVVWWWXYYYZ"
 
 class Engine():
+	"""
+	This class handles the game logic. It generates a random grid of letters and, 
+	aided by the :class:`.Trie` object, calculates all possible words aided by the :class:`.Trie` object 
+	as well as storing other game-related information such as the maximum possible words and the current 
+	score of the player. It is called by the :class:`.Interface` object on game runtime. Throughout the 
+	whole instance of the game, only one :class:`.Engine` instance will be used, and is therefore should 
+	not be called upon directly by the main method.
+
+	Attributes:
+		self.trie (Trie): The word trie formed by the current board configuartions.
+		self.max_score (int): The maximum possible score given possible words.
+		self.curr_score (int): The current score of game state.
+		self.game_board_size (int): The dimensions of the current board. Has two possible values: 4 and 5.
+		self.game_board (list): A two-dimensional array of characters representing the current game board.
+		self.game_solutions (set): The set of all calculated possible words given a board and the dictionary of words.
+		self.game_answered (list): The list of correct answered so far in a game state.
+	"""
 	def __init__(self):
 		self.trie = my_trie.Trie()
 		self.trie.add_to_trie(open("dictionary.txt", "r").read().split("\n"))
@@ -24,13 +42,12 @@ class Engine():
 		self.game_board_size = None
 		self.game_board = None
 		self.game_solutions = set()
-		self.game_answered = None
+		self.game_answered = []
 
 	def make_board(self, size):
 		self.game_board_size = size
 		self.max_score = 0
 		self.curr_score = 0
-		self.game_answered = []
 		board = []
 		for i in range(0, int(size**2), size):
 			board.append([choice(ALPH) for j in range(size)])

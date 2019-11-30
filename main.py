@@ -1,6 +1,5 @@
 import pyglet
-import engine as e
-import interface as i
+from modules import interface as i
 from pyglet.window import key
 from random import choice
 from math import sqrt
