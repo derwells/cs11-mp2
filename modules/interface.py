@@ -19,6 +19,8 @@ class Interface():
 		self.scp_regular = pyglet.font.load('Source Code Pro', bold = False, italic = False)
 		self.scp_bold = pyglet.font.load('Source Code Pro Bold', bold = True, italic = False)
 		self.game_layout = pyglet.image.load('resources/game_gui.png')
+		self.grid_4x4 = pyglet.image.load('resources/letter_box_4x4.png')
+		self.grid_5x5 = pyglet.image.load('resources/letter_box_5x5.png')
 		pyglet.resource.reindex()
 
 	def start_menu(self):
@@ -65,6 +67,8 @@ class Interface():
 		self.active_buttons = []
 		self.game_user_input = ""
 		self.engine.make_board(self.select_board_size)
+		for i in self.engine.game_board:
+			print(i)
 		self.engine.solve_boggle()
 		self.start = time.time()
 		self.max_time = len(self.engine.game_solutions)*5
@@ -93,7 +97,7 @@ class Interface():
 				font_size=12,
 				x=50, y=300,
 				anchor_x='center', anchor_y='center',
-				color = (57,255,0,255)
+				color = (255,255,255,255)
 				).draw()
 
 	def difficulty_screen(self):
@@ -104,7 +108,7 @@ class Interface():
 				font_size=12,
 				x=100, y=300,
 				anchor_x='center', anchor_y='center',
-				color = (57,255,0,255)
+				color = (255,255,255,255)
 				).draw()
 
 			pyglet.text.Label(
@@ -113,7 +117,7 @@ class Interface():
 				font_size=12,
 				x=100, y=200,
 				anchor_x='center', anchor_y='center',
-				color = (57,255,0,255)
+				color = (255,255,255,255)
 				).draw()
 
 	def timer(self, current_time):
@@ -124,7 +128,7 @@ class Interface():
 		pyglet.text.Label(
 			"{0}:{1}".format(minutes, seconds),
 			font_name='Source Code Pro', bold = True,
-			font_size=12,
+			font_size=11,
 			x=408, y=580,
 			anchor_x='center',
 			color = (0,0,0,255)
@@ -140,11 +144,11 @@ class Interface():
 	def input_box(self):
 		current_input = self.view_as_qu(self.game_user_input)
 		pyglet.text.Label(
-			"root@terminal:~$ " + current_input,
+			"> " + current_input,
 			font_name='Source Code Pro', bold = True,
 			font_size=11,
 			x=415, y=35,
-			color = (57,255,0,255)
+			color = (255,255,255,255)
 			).draw()
 
 		if self.engine.game_answered != []:
@@ -158,7 +162,7 @@ class Interface():
 						font_name='Source Code Pro', bold = True,
 						font_size=11,
 						x=415, y=35 + 20*(i+1),
-						color = (57,255,0,255)
+						color = (255,255,255,255)
 						).draw()
 
 		return
@@ -172,7 +176,7 @@ class Interface():
 					font_name='Hack', bold = True,
 					font_size=8,
 					x=30, y=120 - 10*i,
-					color = (57,255,0,255)
+					color = (255,255,255,255)
 					).draw()
 		else:
 			indicator = self.ascii.error
@@ -182,46 +186,48 @@ class Interface():
 					font_name='Hack', bold = True,
 					font_size=8,
 					x=80, y=120 - 10*i,
-					color = (57,255,0,255)
+					color = (255,255,255,255)
 					).draw()
 
 
 	def stats(self):
 		info = [
-			"unhacked  words: " + str(len(self.engine.game_solutions) - len(self.engine.game_answered)) + 
-			"  hacked  words: " + str(len(self.engine.game_solutions)),
-			"unhacked points: " + str(self.engine.max_score - self.engine.curr_score) +
-			"  hacked points: " + str(self.engine.curr_score),
-			"---------------------------------------",
-			"3-4 letters: 1pt",
-			"  5 letters: 2pts",
-			"  6 letters: 3pts",
-			"  7 letters: 5pts",
-			" >7 letters: 11pts"
-		]
+				"unhacked  words: " + str(len(self.engine.game_solutions) - len(self.engine.game_answered)) + 
+				" hacked  words: " + str(len(self.engine.game_answered)),
+				"unhacked points: " + str(self.engine.max_score - self.engine.curr_score) +
+				" hacked points: " + str(self.engine.curr_score),
+				"---------------------------------------",
+				"3-4 letters: 1pt",
+				"  5 letters: 2pts",
+				"  6 letters: 3pts",
+				"  7 letters: 5pts",
+				" 8+ letters: 11pts"
+				]
 
 		for i in range(8):
 			pyglet.text.Label(
 				info[i],
 				font_name='Source Code Pro', bold = True,
 				font_size=11,
-				x=35, y=120-(12*i),
-				color = (57,255,0,255)
+				x=35, y=150-(20*i),
+				color = (255,255,255,255)
 				).draw()
 
-
+#1eb1d1, 007890, 00bee7
 	def set_to_n(self, dt):
 		self.answer_correct = "n"
 
 	def game_screen(self):
 		if self.game_is_running == True:
-
 			self.game_layout.blit(0, 0)
+			if self.select_board_size == 4:
+				self.grid_4x4.blit(22, 183)
+			else:
+				self.grid_5x5.blit(22, 183)
+
 			current_time = time.time() - self.start
 			self.timer(current_time)
-
 			self.input_box()
-
 			if self.answer_correct != "n":
 				self.indicator()
 				pyglet.clock.schedule_once(self.set_to_n, 0.5)
@@ -232,13 +238,22 @@ class Interface():
 					for j in range(self.select_board_size):
 						letter = self.engine.game_board[i][j]
 						letter = self.view_as_qu(letter)
+						letter = "Qu" if "qu" in letter else letter.capitalize()
+						if self.select_board_size == 4:
+							idx = 68+95*j+1
+							idy = 512-95*i
+							fs = 32
+						else:
+							idx = 60+75*j+1
+							idy = 522-75*i
+							fs = 24
 						pyglet.text.Label(
 							letter,
-							font_name='Source Code Pro', bold = True,
-							font_size=12,
-							x=275-50*i, y=350-50*j,
+							font_name='Subway Ticker', bold = True,
+							font_size=fs,
+							x=idx, y=idy,
 							anchor_x='center', anchor_y='center',
-							color = (57,255,0,255)
+							color = (255,255,255,255)
 							).draw()
 
 			if current_time >= self.max_time or self.engine.curr_score == self.engine.max_score: #time
@@ -253,7 +268,7 @@ class Interface():
 					font_size=12,
 					x=100, y=100,
 					anchor_x='center', anchor_y='center',
-					color = (57,255,0,255)
+					color = (255,255,255,255)
 					).draw()
 			else:
 				pyglet.text.Label(
@@ -262,7 +277,7 @@ class Interface():
 					font_size=12,
 					x=100, y=100,
 					anchor_x='center', anchor_y='center',
-					color = (57,255,0,255)
+					color = (255,255,255,255)
 					).draw()
 
 			pyglet.text.Label(
@@ -271,7 +286,7 @@ class Interface():
 				font_size=12,
 				x=100, y=200,
 				anchor_x='center', anchor_y='center',
-				color = (57,255,0,255)
+				color = (255,255,255,255)
 				).draw()
 
 			username = self.game_user_input
@@ -281,7 +296,7 @@ class Interface():
 				font_size=12,
 				x=self.window.width//2 - 100, y=self.window.height//2 - 100,
 				anchor_x='center', anchor_y='center',
-				color = (57,255,0,255)
+				color = (255,255,255,255)
 				).draw()
 
 
