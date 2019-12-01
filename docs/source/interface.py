@@ -126,10 +126,12 @@ class Interface():
 		self.active_buttons = []
 		self.game_user_input = ""
 		self.engine.make_board(self.select_board_size)
+		for i in self.engine.game_board:
+			print(i)
 		self.engine.solve_board()
 		self.start = time.time()
 		self.max_time = len(self.engine.game_solutions)*5
-
+		print(self.engine.game_solutions)
 
 	def game_end(self):
 		"""Sets game end (game over) menu state"""
