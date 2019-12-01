@@ -1,4 +1,4 @@
-import pyglet, time
+import pyglet, time, random
 from modules import ascii_art as a
 from modules import engine as e
 from pyglet.window import key
@@ -7,58 +7,82 @@ class Interface():
 	def __init__(self):
 		self.window = pyglet.window.Window(width = 800, height = 600)
 		self.active_buttons = []
-		self.menu_is_running = True
+		self.lb_list = []
+		self.start_is_running = True
 		self.game_is_running = False
 		self.lb_is_running = False
 		self.end_is_running = False
 		self.init_menu = False
 		self.diff_is_running = False
 		self.ascii = a.Ascii()
+		self.engine = e.Engine()
+		
 		pyglet.resource.path = ['resources/']
 		pyglet.font.add_directory('resources/')
 		self.scp_regular = pyglet.font.load('Source Code Pro', bold = False, italic = False)
 		self.scp_bold = pyglet.font.load('Source Code Pro Bold', bold = True, italic = False)
+		self.lb_layout = pyglet.image.load('resources/leaderboard.png')
 		self.game_layout = pyglet.image.load('resources/game_gui.png')
 		self.grid_4x4 = pyglet.image.load('resources/letter_box_4x4.png')
 		self.grid_5x5 = pyglet.image.load('resources/letter_box_5x5.png')
+		self.title = pyglet.image.load('resources/rsz_title.png')
 		pyglet.resource.reindex()
 
 	def start_menu(self):
-		self.menu_is_running = True
+		self.start_is_running = True
 		self.game_is_running = False
 		self.diff_is_running = False
 		self.lb_is_running = False
 		self.init_menu = False
 		self.end_is_running = False
 
-		self.engine = e.Engine()
 		self.game_user_input = ""
 		self.curr_button = None
-		self.active_buttons = []
-		self.active_buttons.append(self.difficulty)
+		self.active_buttons = [self.difficulty, self.leaderboard]
+
+	def leaderboard(self):
+		self.lb_is_running = True
+		self.diff_is_running = False
+		self.end_is_running = False
+		self.start_is_running = False
+		self.game_is_running = False
+		self.init_menu = False
+
+		self.show_idx = 0
+		self.curr_button = None
+		self.active_buttons = [self.start_menu]
+		lb_file = open("leaderboard.txt","r")
+		lb_list = [i.split(',') for i in lb_file.read().split()]
+		lb_file.close()
+		lb_list = sorted(lb_list, key = lambda x: int(x[1])/int(x[2]), reverse = True)
+		self.lb_list = lb_list
 
 	def difficulty(self):
 		self.diff_is_running = True
 		self.end_is_running = False
-		self.menu_is_running = False
+		self.start_is_running = False
 		self.game_is_running = False
 		self.init_menu = False
 		self.lb_is_running = False
 
 		self.select_board_size = None
 		self.curr_button = None
-		self.active_buttons = []
-		self.active_buttons.append('normal')
-		self.active_buttons.append('hard')
+		self.active_buttons = ['normal', 'hard']
 
 	def boggle(self):
 		self.game_is_running = True
-		self.menu_is_running = False
+		self.start_is_running = False
 		self.lb_is_running = False
 		self.end_is_running = False
 		self.diff_is_running = False
 		self.init_menu = False
-		self.menu_is_running = False
+
+		self.engine.max_score = None
+		self.engine.curr_score = None
+		self.engine.game_board_size = None
+		self.engine.game_board = None
+		self.engine.game_solutions = set()
+		self.engine.game_answered = []
 
 		self.caret_idx = 0
 		self.answer_idx = 0
@@ -77,7 +101,7 @@ class Interface():
 	def game_end(self):
 		self.end_is_running = True
 		self.diff_is_running = False
-		self.menu_is_running = False
+		self.start_is_running = False
 		self.game_is_running = False
 		self.lb_is_running = False
 		self.init_menu = False
@@ -90,33 +114,101 @@ class Interface():
 
 
 	def start_screen(self):
-		if self.menu_is_running == True:
+		if self.start_is_running == True:
+			for i in range(len(self.ascii.title)):
+				pyglet.text.Label(
+					self.ascii.title[i],
+					font_name='Source Code Pro', bold = True,
+					font_size=12,
+					x=160, y=380-14*i,
+					color = (57, 255, 20, 255)
+				).draw()
+
+			caret1, caret2 = '',''
+			if self.curr_button == 0:
+				caret1, caret2 = '>',''
+			elif self.curr_button == 1:
+				caret1, caret2 = '','>'
 			pyglet.text.Label(
-				">wordhack",
+				caret1 + "start",
 				font_name='Source Code Pro', bold = True,
-				font_size=12,
-				x=50, y=300,
-				anchor_x='center', anchor_y='center',
+				font_size=11,
+				x=380, y=300,
 				color = (57, 255, 20, 255)
 			).draw()
+			pyglet.text.Label(
+				caret2 + "leaderboard",
+				font_name='Source Code Pro', bold = True,
+				font_size=11,
+				x=380, y=260,
+				color = (57, 255, 20, 255)
+			).draw()
+			
+	def leaderboard_screen(self):
+		if self.lb_is_running == True:
+			self.lb_layout.blit(0,0)
+			pyglet.text.Label(
+				"past hacks",
+				font_name='Source Code Pro', bold = True,
+				font_size=11,
+				x=408, y=580,
+				anchor_x='center',
+				color = (0,0,0,255)
+			).draw()
+
+			for i in range(min(len(self.lb_list), 37)):
+				log = self.lb_list[i + self.show_idx]
+				pyglet.text.Label(
+					log[0] + "."*(45 - len(log[0]) - len(log[1]) - len(log[2]) - 1) + "{0}/{1}".format(log[1],log[2]),
+					font_name='Source Code Pro', bold = True,
+					font_size=10,
+					x=220, y=540 - 14*i,
+					color = (57, 255, 20, 255)
+				).draw()
+
+			if self.curr_button == 0:
+				caret1 = '>'
+			else:
+				caret1 = ''
+
+			pyglet.text.Label(
+					caret1 + "back",
+					font_name='Source Code Pro', bold = True,
+					font_size=11,
+					x=725, y=26,
+					color = (57, 255, 20, 255)
+				).draw()
+
+
 
 	def difficulty_screen(self):
 		if self.diff_is_running == True:
+			for i in range(len(self.ascii.title)):
+				pyglet.text.Label(
+					self.ascii.title[i],
+					font_name='Source Code Pro', bold = True,
+					font_size=12,
+					x=160, y=380-14*i,
+					color = (57, 255, 20, 255)
+				).draw()
+
+			caret1, caret2 = '',''
+			if self.curr_button == 0:
+				caret1, caret2 = '>',''
+			elif self.curr_button == 1:
+				caret1, caret2 = '','>'
 			pyglet.text.Label(
-				"normal",
+				caret1 + "4x4",
 				font_name='Source Code Pro', bold = True,
-				font_size=12,
-				x=100, y=300,
-				anchor_x='center', anchor_y='center',
+				font_size=11,
+				x=380, y=300,
 				color = (57, 255, 20, 255)
 			).draw()
-
 			pyglet.text.Label(
-				"hard",
+				caret2 + "5x5",
 				font_name='Source Code Pro', bold = True,
-				font_size=12,
-				x=100, y=200,
-				anchor_x='center', anchor_y='center',
+				font_size=11,
+				x=380, y=260,
 				color = (57, 255, 20, 255)
 			).draw()
 
@@ -140,29 +232,6 @@ class Interface():
 				if word[i] == '$':
 					word = word[:i] + 'qu' + word[i + 1:]
 		return word
-
-	def input_box(self):
-		pyglet.text.Label(
-			"> " + self.game_user_input,
-			font_name='Source Code Pro', bold = True,
-			font_size=10,
-			x=415, y=35,
-			color = (57, 255, 20, 255)
-		).draw()
-
-		if self.engine.game_answered != []:
-				for i in range(min(len(self.engine.game_answered), 25)):
-					len_answered = len(self.engine.game_answered) - 1
-
-					pyglet.text.Label(
-						"root@terminal:~$ " + self.view_as_qu(self.engine.game_answered[len_answered - i]),
-						font_name='Source Code Pro', bold = True,
-						font_size=10,
-						x=415, y=35 + 20*(i+1),
-						color = (57, 255, 20, 255)
-					).draw()
-
-		return
 	
 	def indicator(self):
 		if self.answer_correct == "t":
@@ -188,9 +257,10 @@ class Interface():
 
 
 	def stats(self):
+		calc = int(100*self.engine.curr_score/(self.engine.max_score*0.5))
 		info = [
-			"hacking..............................{0}%".format(int(100*self.engine.curr_score/self.engine.max_score)),
-			"words................................{0}".format(len(self.engine.game_solutions) - len(self.engine.game_answered))
+			"hacking............................{0}%".format(100 if calc >= 100 else calc),
+			"words..............................{0}".format(len(self.engine.game_solutions) - len(self.engine.game_answered)),
 		]
 
 		for i in range(2):
@@ -201,8 +271,16 @@ class Interface():
 				x=35, y=150-(15*i),
 				color = (57, 255, 20, 255)
 				).draw()
+		
+		for i in range(5):
+			pyglet.text.Label(
+				self.ascii.binary_sm[random.randint(0,3)],
+				font_name='Source Code Pro', bold = True,
+				font_size=11,
+				x=35, y=120-(15*(i+1)),
+				color = (57, 255, 20, 255)
+				).draw()
 
-#1eb1d1, 007890, 00bee7
 	def set_to_n(self, dt):
 		self.answer_correct = "n"
 
@@ -216,7 +294,7 @@ class Interface():
 
 			current_time = time.time() - self.start
 			self.timer(current_time)
-			self.input_box()
+
 			if self.answer_correct != "n":
 				self.indicator()
 				pyglet.clock.schedule_once(self.set_to_n, 0.5)
@@ -243,49 +321,85 @@ class Interface():
 							anchor_x='center', anchor_y='center',
 							color = (57, 255, 20, 255)
 						).draw()
+			
 
-			if current_time >= self.max_time or self.engine.curr_score == self.engine.max_score: #time
+			if self.engine.game_answered != []:
+					for i in range(min(len(self.engine.game_answered), 25)):
+						len_answered = len(self.engine.game_answered) - 1
+
+						pyglet.text.Label(
+							"root@terminal:~$ " + self.view_as_qu(self.engine.game_answered[len_answered - i]),
+							font_name='Source Code Pro', bold = True,
+							font_size=10,
+							x=415, y=35 + 20*(i+1),
+							color = (57, 255, 20, 255)
+						).draw()
+
+			pyglet.text.Label(
+				"> " + self.game_user_input,
+				font_name='Source Code Pro', bold = True,
+				font_size=10,
+				x=415, y=35,
+				color = (57, 255, 20, 255)
+			).draw()
+
+			if current_time >= self.max_time: #condition for game to end
 				self.game_end()
 
 	def game_end_screen(self):
 		if self.end_is_running == True:
-			if self.engine.curr_score >= int(self.engine.max_score*0.4):
-				pyglet.text.Label(
-					'Successful wordhack.',
-					font_name='Source Code Pro', bold = True,
-					font_size=12,
-					x=100, y=100,
-					anchor_x='center', anchor_y='center',
-					color = (57, 255, 20, 255)
-				).draw()
+			self.game_layout.blit(0, 0)
+			
+			#username
+			pyglet.text.Label(
+				"enter username:",
+				font_name='Source Code Pro', bold = True,
+				font_size=10,
+				x=415, y=49,
+				color = (57, 255, 20, 255)
+			).draw()
+
+			pyglet.text.Label(
+				"> " + self.game_user_input,
+				font_name='Source Code Pro', bold = True,
+				font_size=10,
+				x=415, y=35,
+				color = (57, 255, 20, 255)
+			).draw()
+
+			if self.engine.curr_score >= self.engine.max_score*0.5: #win-condition
+				message = "SUCCESS"
 			else:
+				message = "FAIL"
+
+			pyglet.text.Label(
+				message,
+				font_name='Source Code Pro', bold = True,
+				font_size=11,
+				x=408, y=580,
+				anchor_x='center',
+				color = (0,0,0,255)
+			).draw()
+
+			for i in range(8):
 				pyglet.text.Label(
-					'w0rdh@ck f@il3d...',
+					self.ascii.binary_sm[random.randint(0,3)],
 					font_name='Source Code Pro', bold = True,
-					font_size=12,
-					x=100, y=100,
-					anchor_x='center', anchor_y='center',
+					font_size=11,
+					x=35, y=150-(15*i),
 					color = (57, 255, 20, 255)
 				).draw()
 
-			pyglet.text.Label(
-				"back to menu",
-				font_name='Source Code Pro', bold = True,
-				font_size=12,
-				x=100, y=200,
-				anchor_x='center', anchor_y='center',
-				color = (57, 255, 20, 255)
-			).draw()
+			for i in range(23):
+				pyglet.text.Label(
+					self.ascii.jumbled_char[random.randint(0,19)],
+					font_name='Source Code Pro', bold = True,
+					font_size=11,
+					x=35, y=535-(15*i),
+					color = (57, 255, 20, 255)
+				).draw()
 
-			username = self.game_user_input
-			pyglet.text.Label(
-				username,
-				font_name='Source Code Pro', bold = True,
-				font_size=12,
-				x=self.window.width//2 - 100, y=self.window.height//2 - 100,
-				anchor_x='center', anchor_y='center',
-				color = (57, 255, 20, 255)
-			).draw()
+			#35 40
 
 
 	def update(self, dt):
@@ -293,6 +407,7 @@ class Interface():
 		def on_draw():
 			self.window.clear()
 			self.start_screen()
+			self.leaderboard_screen()
 			self.difficulty_screen()
 			self.game_screen()
 			self.game_end_screen()
@@ -303,14 +418,20 @@ class Interface():
 
 		@self.window.event
 		def on_key_press(symbol, modifiers):
-			if self.menu_is_running == True or self.end_is_running == True:
+			if self.start_is_running == True or self.lb_is_running == True:
 				if self.curr_button != None:
 					if symbol == key.UP:
 						if self.curr_button > 0:
 							self.curr_button -= 1
+						if self.lb_is_running == True:
+							if self.show_idx > 0:
+								self.show_idx -= 1
 					elif symbol == key.DOWN:
 						if self.curr_button < len(self.active_buttons) - 1:
 							self.curr_button += 1
+						if self.lb_is_running == True:
+							if self.show_idx < len(self.lb_list) - 37: # - 37 == EOL
+								self.show_idx += 1
 					elif symbol == key.ENTER:
 						if self.curr_button <= len(self.active_buttons) - 1 and self.curr_button >= 0:
 							self.active_buttons[self.curr_button]()
@@ -343,12 +464,12 @@ class Interface():
 				if symbol == key.BACKSPACE:
 					self.game_user_input = self.game_user_input[:len(self.game_user_input) - 1]
 				if symbol == key.ENTER:
-					username = self.game_user_input
-					self.game_user_input = ""
+					if self.game_user_input == "":
+						self.game_user_input == "(n/a)"
 					leaderboard = open("leaderboard.txt", "a")
 					leaderboard.write("{0},{1},{2}\n".format(username, self.engine.curr_score, self.engine.max_score))
 					leaderboard.close()
-					self.active_buttons.append(self.start_menu)
+					self.start_menu()
 						
 
 			if self.game_is_running == True:
@@ -367,20 +488,10 @@ class Interface():
 							self.game_user_input = ""
 						else:
 							self.game_user_input = self.engine.game_answered[self.answer_idx]
-				if (97 <= symbol <= 122) and len(self.game_user_input) <= 26:
+				if (97 <= symbol <= 122) and len(self.game_user_input) <= 25:
 					self.answer_idx = len(self.engine.game_answered) #when a key is pressed, reset idx
 					self.game_user_input += chr(symbol)
-					"""if self.game_is_running == True:
-						if self.game_user_input != "":
-							print(self.game_user_input) #bugged
-							if self.game_user_input[len(self.game_user_input) - 1] == 'q':
-								self.game_user_input = self.game_user_input[:len(self.game_user_input) - 1] + '$'
-							else:
-								self.game_user_input += 'u'
-						else:
-							self.game_user_input += "u"
-					else:
-						self.game_user_input += "u"""
+
 				if symbol == key.BACKSPACE:
 					self.game_user_input = self.game_user_input[:len(self.game_user_input) - 1]
 					self.answer_idx = len(self.engine.game_answered) #when a key is pressed, reset idx

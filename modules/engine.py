@@ -1,20 +1,9 @@
-# We import a file containing my version of the trie tree data 
-# structure, which will be particularly useful in searching for
-# valid words
+
 import pyglet
-from modules import my_trie
-from random import choice
+from modules import trie
+from random import randint
 from math import sqrt
 
-# Constants for indexing the tuples that contain relevant information
-# about which letter we're looking at an what word we're considering
-# it to be a part of as we traverse the board
-ROW = 0
-COL = 1
-NODE = 2	
-GRID = 3
-ADJ = [[1, 1],[-1, 1], [1, -1], [-1, -1], [0, 1], [1, 0], [0, -1], [-1, 0]]
-ALPH = "AAAAAABBCCDDDEEEEEEEEEEEFFGGHHHHHIIIIIIJKLLLLMMNNNNNNOOOOOOOPP$RRRRRSSSSSSTTTTTTTTTUUUVVWWWXYYYZ$$$$$$$$$$$$$"
 
 class Engine():
 	"""
@@ -35,23 +24,59 @@ class Engine():
 		self.game_answered (list): The list of correct answered so far in a game state.
 	"""
 	def __init__(self):
-		self.trie = my_trie.Trie()
+		self.trie = trie.Trie()
 		self.trie.add_to_trie(open("dictionary.txt", "r").read().split("\n"))
-		self.max_score = None
-		self.curr_score = None
-		self.game_board_size = None
-		self.game_board = None
+		self.max_score = 0
+		self.curr_score = 0
+		self.game_board_size = 0
+		self.game_board = []
 		self.game_solutions = set()
 		self.game_answered = []
 
 	def make_board(self, size):
 		self.game_board_size = size
+		self.game_board = []
 		self.max_score = 0
 		self.curr_score = 0
-		board = []
-		for i in range(0, int(size**2), size):
-			board.append([choice(ALPH) for j in range(size)])
-		self.game_board = board
+
+		letter_cubes = [
+			"AACIOT",
+			"ABILTY",
+			"ABJMO$",
+			"ACDEMP",
+			"ACELRS",
+			"ADENVZ",
+			"AHMORS",
+			"BIFORX",
+			"DENOSW",
+			"DKNOTU",
+			"EEFHIY",
+			"EGKLUY",
+			"EGINTV",
+			"EHINPS",
+			"ELPSTU",
+			"GILRUW",
+			"AACIOT",
+			"ABILTY",
+			"ABJMO$",
+			"ACDEMP",
+			"ACELRS",
+			"ADENVZ",
+			"AHMORS",
+			"BIFORX",
+			"DENOSW"
+		]
+
+		row_count = 0
+		row = []
+		for cube in range(size*size):
+			idx = randint(0,5)
+			row.append(letter_cubes[cube][idx])
+			row_count += 1
+			if row_count == size:
+				self.game_board.append(row)
+				row = []
+				row_count = 0
 		return
 
 	def solve_boggle(self):
@@ -65,15 +90,19 @@ class Engine():
 		solutions = set()
 		stack = []
 		stack.append((i, j, trie.root, board))
+		adj_dist = [
+			[1, 1],[-1, 1],[1, -1],[-1, -1],
+			[0, 1],[1, 0],[0, -1],[-1, 0]
+		]
 		while len(stack) > 0:
 			curr_letter = stack.pop()
-			curr_node = curr_letter[NODE]
-			for delta in ADJ:
+			curr_node = curr_letter[2]
+			for delta in adj_dist:
 				dx, dy = delta
-				x = min(max(curr_letter[ROW] + dx, 0), self.game_board_size - 1)
-				y = min(max(curr_letter[COL] + dy, 0), self.game_board_size - 1)
+				x = min(max(curr_letter[0] + dx, 0), self.game_board_size - 1)
+				y = min(max(curr_letter[1] + dy, 0), self.game_board_size - 1)
 				board_copy = []
-				for i in curr_letter[GRID]:
+				for i in curr_letter[3]:
 					row_copy = []
 					for j in i:
 						row_copy.append(j)
