@@ -1,9 +1,10 @@
 Welcome to Wordhack's documentation!
 ====================================
 
-.. automodule:: my_project.main
+.. automodule:: main
     :members:
 
+Contents:
 
 .. toctree::
    :maxdepth: 2
