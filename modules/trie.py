@@ -1,5 +1,6 @@
 class TrieNode:
-	"""Represents node in Trie class.
+	"""
+	Represents node in Trie class.
 	
 	Attributes:
 		value (string): Letter contained in node.
@@ -22,7 +23,8 @@ class TrieNode:
 		self.children.append(child)
 
 	def get_child(self, value):
-		"""Find direct child of current node with given value
+		"""
+		Find direct child of current node with given value
 
 		Args:
 			value (string): Refer to TrieNode.
@@ -42,8 +44,9 @@ class TrieNode:
 
 
 class Trie:
-	"""Data structure that allows for faster verification of word combinations.
-	Collection of TrieNodes
+	"""
+	Data structure that allows for faster verification of word combinations through
+	a collection of TrieNodes.
 
 	Attributes:
 		root (TrieNode): Root of current trie.

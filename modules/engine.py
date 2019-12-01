@@ -5,7 +5,8 @@ from math import sqrt
 
 
 class Engine():
-	"""This class handles the game logic. 
+	"""
+	This class handles the game logic. 
 	
 	Generates a random grid of letters and, aided by the :class:`.Trie` object, calculates all
 	possible words aided by the :class:`.Trie` object  as well as storing other game-related 
@@ -94,7 +95,8 @@ class Engine():
 		return
 
 	def solve_board(self):
-		"""Recursive function that traverses current boggle board and
+		"""
+		Recursive function that traverses current boggle board and
 		updates :attr:`.game_solutions` with possible words.
 		"""
 
@@ -105,7 +107,8 @@ class Engine():
 		return
 
 	def words_from_start(self, board, i, j, trie):
-		"""Returns set of possible words starting from position (i,j) in the board.
+		"""
+		Returns set of possible words starting from position (i,j) in the board.
 		Uses Trie to verify word.
 
 		Args:
@@ -188,7 +191,8 @@ class Engine():
 		return points
 	
 	def verify(self, word):
-		"""Determines if word is a valid answer.
+		"""
+		Determines if word is a valid answer.
 		
 		Args:
 			word (string): User answer.

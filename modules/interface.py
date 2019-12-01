@@ -4,7 +4,8 @@ from modules import engine as e
 from pyglet.window import key
 
 class Interface():
-	"""Handles all of GUI work as well as updating leaderboard and some game logic.
+	"""
+	Handles all of GUI work as well as updating leaderboard and some game logic.
 	Utilizes one instance of :class:'Engine' throughout the whole program to prevent
 	dictionary trie loading time.
 
@@ -251,7 +252,8 @@ class Interface():
 			).draw()
 
 	def timer(self, current_time):
-		"""Loads timer label onto window during the main game
+		"""
+		Loads timer label onto window during the main game
 
 		Args:
 			current_time (int): From time.time() called in :meth:`game_screen`.
@@ -272,7 +274,8 @@ class Interface():
 		).draw()
 	
 	def view_as_qu(self, word):
-		"""Helper function to convert '$' char in string to
+		"""
+		Helper function to convert '$' char in string to
 		user-friendly 'qu'
 		
 		Args:
@@ -286,7 +289,8 @@ class Interface():
 		return word
 	
 	def indicator(self):
-		"""Loads indicator label ("success"/"error") onto
+		"""
+		Loads indicator label ("success"/"error") onto
 		window during main game when answer is entered.
 		"""
 
@@ -312,7 +316,8 @@ class Interface():
 				).draw()
 
 	def set_to_n(self, dt):
-		"""Helper function for :meth:`indicator` animation.
+		"""
+		Helper function for :meth:`indicator` animation.
 		
 		Args:
 			dt (int): Used by pyglet.clock.schedule(). Indicates delay in seconds.
@@ -320,7 +325,8 @@ class Interface():
 		self.answer_correct = "n"
 
 	def stats(self):
-		"""Loads current game statistics as labels  and decorative
+		"""
+		Loads current game statistics as labels  and decorative
 		ASCII art from :class:`Ascii` onto window during main game.
 		"""
 

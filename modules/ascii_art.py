@@ -1,5 +1,6 @@
 class Ascii():
-    """Contains ASCII art to be used in Interface. :attr:`title`,
+    """
+    Contains ASCII art to be used in Interface. :attr:`title`,
     :attr:`success`, and :attr:`error` sourced from:
     http://patorjk.com/software/taag/.
 
