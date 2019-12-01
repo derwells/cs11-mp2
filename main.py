@@ -1,10 +1,9 @@
 import pyglet
 from modules import interface as i
-from pyglet.window import key
-from random import choice
-from math import sqrt
 
 def main():
+    """Starts the program"""
+
     screen = i.Interface()
     screen.start_menu()
     pyglet.clock.schedule(screen.update)

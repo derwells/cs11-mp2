@@ -1,20 +1,32 @@
 class Ascii():
+    """Contains ASCII art to be used in Interface. :attr:`title`,
+    :attr:`success`, and :attr:`error` sourced from:
+    http://patorjk.com/software/taag/.
+
+    Attribues:
+        title (list): Title shown in start and difficulty menu.
+        success (list): Text indicator if word is valid.
+        error (list): Text indicator if word is invalid.
+        binary_sm (list): Decorative text.
+        jumbled_char (list): Decorative text.
+    """
+
     def __init__(self):
         self.title = """ _ _ _ _____ _____ ____  _____ _____ _____ _____ 
 | | | |     | __  |    \|  |  |  _  |     |  |  |
 | | | |  |  |    -|  |  |     |     |   --|    -|
 |_____|_____|__|__|____/|__|__|__|__|_____|__|__|"""
         self.title = self.title.split('\n')
-        self.error = """  ___ _ __ _ __ ___  _ __ 
- / _ \ '__| '__/ _ \| '__|
-|  __/ |  | | | (_) | |   
- \___|_|  |_|  \___/|_|   """    
-        self.error = self.error.split('\n')
         self.success = """ ___ _   _  ___ ___ ___  ___ ___ 
 / __| | | |/ __/ __/ _ \/ __/ __|
 \__ \ |_| | (_| (_|  __/\__ \__ \\
 |___/\__,_|\___\___\___||___/___/"""
         self.success = self.success.split('\n')
+        self.error = """  ___ _ __ _ __ ___  _ __ 
+ / _ \ '__| '__/ _ \| '__|
+|  __/ |  | | | (_) | |   
+ \___|_|  |_|  \___/|_|   """    
+        self.error = self.error.split('\n')
         self.binary_sm = [
             "001001010011101010001101010010000010101",
 			"110101101000111010011010000010010111010",
