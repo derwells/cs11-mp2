@@ -1,21 +1,14 @@
-(CS11 MP2) Wordhack Documentation
+.. (CS11 MP2) Wordhack documentation master file, created by
+   sphinx-quickstart on Sun Dec  1 19:43:20 2019.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to (CS11 MP2) Wordhack's documentation!
 ===============================================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-
-.. automodule:: interface
-    :members:
-
-.. automodule:: engine
-    :members:
-
-.. automodule:: trie
-    :members:
-    
-.. automodule:: ascii
-    :members:
 
 
 

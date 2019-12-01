@@ -12,21 +12,21 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os
-import sys
-sys.path.insert(0, os.path.abspath('../'))
+# import os
+# import sys
+# sys.path.insert(0, os.path.abspath('.'))
 
 
 # -- Project information -----------------------------------------------------
 
-project = u'(cs11_mp2) wordhack'
+project = u'(CS11 MP2) Wordhack'
 copyright = u'2019, Group 17'
 author = u'Group 17'
 
 # The short X.Y version
 version = u''
 # The full version, including alpha/beta/rc tags
-release = u''
+release = u'0.0.1'
 
 
 # -- General configuration ---------------------------------------------------
@@ -40,14 +40,8 @@ release = u''
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.napoleon'
 ]
 
-napoleon_google_docstring = True
-napoleon_use_param = True
-napoleon_use_ivar = True
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -108,7 +102,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'cs11_mp2wordhackdoc'
+htmlhelp_basename = 'CS11MP2Wordhackdoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -135,7 +129,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'cs11_mp2wordhack.tex', u'(cs11\\_mp2) wordhack Documentation',
+    (master_doc, 'CS11MP2Wordhack.tex', u'(CS11 MP2) Wordhack Documentation',
      u'Group 17', 'manual'),
 ]
 
@@ -145,7 +139,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'cs11_mp2wordhack', u'(cs11_mp2) wordhack Documentation',
+    (master_doc, 'cs11mp2wordhack', u'(CS11 MP2) Wordhack Documentation',
      [author], 1)
 ]
 
@@ -156,8 +150,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'cs11_mp2wordhack', u'(cs11_mp2) wordhack Documentation',
-     author, 'cs11_mp2wordhack', 'One line description of project.',
+    (master_doc, 'CS11MP2Wordhack', u'(CS11 MP2) Wordhack Documentation',
+     author, 'CS11MP2Wordhack', 'One line description of project.',
      'Miscellaneous'),
 ]
 
